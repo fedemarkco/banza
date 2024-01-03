@@ -12,4 +12,4 @@ class CategorySchema(BaseModel):
 
 class CategoryClientSchema(BaseModel):
     id_category: int
-    id_client: int    
+    id_client: int

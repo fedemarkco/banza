@@ -1,6 +1,7 @@
 from fastapi.testclient import TestClient
-from app.config.db_testing import app
+
 from app.config import settings
+from app.config.db_testing import app
 
 
 class TestCaseClient:
@@ -12,9 +13,7 @@ class TestCaseClient:
         Check create a new client
         Return status code 200
         """
-        data = {
-            "name": "New Client"
-        }
+        data = {"name": "New Client"}
 
         response = self.client.post(f"{settings.API_V1_STR}/client/", json=data)
 
@@ -26,9 +25,7 @@ class TestCaseClient:
         Check edit a client
         Return status code 200
         """
-        data = {
-            "name": "Client 2"
-        }
+        data = {"name": "Client 2"}
 
         response = self.client.patch(f"{settings.API_V1_STR}/client/1/", json=data)
 
@@ -50,21 +47,16 @@ class TestCaseClient:
         Check to obtain client information
         Return status code 200
         """
-        data_account = {
-            "id_client": 1
-        }
+        data_account = {"id_client": 1}
 
-        data_category = {
-            "name": "Category 1"
-        }
+        data_category = {"name": "Category 1"}
 
-        data_category_client = {
-            "id_category": 1,
-            "id_client": 1
-        }
-        
+        data_category_client = {"id_category": 1, "id_client": 1}
+
         self.client.post(f"{settings.API_V1_STR}/category/", json=data_category)
-        self.client.post(f"{settings.API_V1_STR}/client_to_category/", json=data_category_client)
+        self.client.post(
+            f"{settings.API_V1_STR}/client_to_category/", json=data_category_client
+        )
         self.client.post(f"{settings.API_V1_STR}/account_to_client/", json=data_account)
 
         response = self.client.get(f"{settings.API_V1_STR}/client_info/1/")

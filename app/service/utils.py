@@ -1,4 +1,5 @@
 import requests
+
 from app.config import settings
 from app.models import MovementEnum
 
@@ -16,7 +17,6 @@ class AccountBalance:
             dolar_amount = "Page not working"
 
         return dolar_amount
-                    
 
     def balance(self, movements):
         total_amount = 0

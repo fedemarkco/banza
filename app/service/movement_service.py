@@ -1,7 +1,7 @@
-from fastapi import status
-from fastapi import HTTPException
-from app.models import Account, Movement, Account, MovementEnum
+from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.models import Account, Movement, MovementEnum
 from app.schemas import MovementSchema
 from app.service.utils import AccountBalance
 
@@ -10,7 +10,7 @@ async def remove_movement_service(id_movement: int, db: AsyncSession) -> Movemen
     """
     Movement is deleted
     """
-    db_movement = db.query(Movement).filter(Movement.id==id_movement).first()
+    db_movement = db.query(Movement).filter(Movement.id == id_movement).first()
 
     if db_movement:
         db.delete(db_movement)
@@ -18,20 +18,34 @@ async def remove_movement_service(id_movement: int, db: AsyncSession) -> Movemen
 
         return db_movement
     else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movement or Account not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Movement or Account not found",
+        )
+
 
 async def movement_service(id_account: int, id_movement: int, db: AsyncSession):
     """
     Obtain movement information
     """
-    db_movement = db.query(Movement).filter(Account.id==id_account, Movement.id==id_movement).first()
+    db_movement = (
+        db.query(Movement)
+        .filter(Account.id == id_account, Movement.id == id_movement)
+        .first()
+    )
 
     if db_movement:
         return db_movement
     else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Movement or Account not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Movement or Account not found",
+        )
 
-async def create_movement_service(movement: MovementSchema, db: AsyncSession) -> Movement:
+
+async def create_movement_service(
+    movement: MovementSchema, db: AsyncSession
+) -> Movement:
     """
     Check if the account exists.
     If a withdrawal is requested, it is checked if the client has an available balance,
@@ -43,13 +57,19 @@ async def create_movement_service(movement: MovementSchema, db: AsyncSession) ->
     if db_account:
         account = AccountBalance()
         amount_pesos, amount_dolar = account.balance(db_account.movements)
-        if (amount_pesos >= movement.amount and movement.type == MovementEnum.WITHDRAWAL) or (movement.type == MovementEnum.DEPOSIT):
+        if (
+            amount_pesos >= movement.amount and movement.type == MovementEnum.WITHDRAWAL
+        ) or (movement.type == MovementEnum.DEPOSIT):
             db_movement = Movement(**movement.dict())
             db.add(db_movement)
             db.commit()
             db.refresh(db_movement)
         else:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="insufficient balance")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail="insufficient balance"
+            )
         return db_movement
     else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Account not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Account not found"
+        )

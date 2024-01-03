@@ -1,10 +1,11 @@
-from fastapi import status
-from fastapi import HTTPException
-from app.models import Client, Account, CategoryClient, Category
+from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.schemas.client_schema import ClientSchema, ClientInfoSchema, ClientNewSchema
-from app.schemas.category_schema import CategorySchema
+
+from app.models import Account, Category, CategoryClient, Client
 from app.schemas import MovementBalanceSchema
+from app.schemas.category_schema import CategorySchema
+from app.schemas.client_schema import (ClientInfoSchema, ClientNewSchema,
+                                       ClientSchema)
 from app.service.utils import AccountBalance
 
 
@@ -20,11 +21,13 @@ async def create_client_service(client: ClientNewSchema, db: AsyncSession) -> Cl
     return db_client
 
 
-async def edit_client_service(id_client: int, client: ClientSchema, db: AsyncSession) -> Client:
+async def edit_client_service(
+    id_client: int, client: ClientSchema, db: AsyncSession
+) -> Client:
     """
     Client data is edited
     """
-    db_client = db.query(Client).filter(Client.id==id_client).first()
+    db_client = db.query(Client).filter(Client.id == id_client).first()
 
     if db_client:
         db_client.name = client.name
@@ -40,7 +43,7 @@ async def delete_client_service(id_client: int, db: AsyncSession) -> Client:
     """
     Client data is deleted
     """
-    db_client = db.query(Client).filter(Client.id==id_client).first()
+    db_client = db.query(Client).filter(Client.id == id_client).first()
 
     if db_client:
         db.delete(db_client)
@@ -64,17 +67,30 @@ async def client_info_service(id_client: int, db: AsyncSession):
     """
     db_client = db.query(Client).filter(Client.id == id_client).first()
     db_accounts = db.query(Account).filter(Account.id_client == id_client).all()
-    db_categories = db.query(Category).join(CategoryClient).filter(CategoryClient.id_client == id_client).all()
+    db_categories = (
+        db.query(Category)
+        .join(CategoryClient)
+        .filter(CategoryClient.id_client == id_client)
+        .all()
+    )
 
     if db_client:
         client_dict = db_client.__dict__
         accounts_list = [db_account.id for db_account in db_accounts]
-        categories_list = [CategorySchema(**db_category.__dict__) for db_category in db_categories]
+        categories_list = [
+            CategorySchema(**db_category.__dict__) for db_category in db_categories
+        ]
 
-        client_info_schema = ClientInfoSchema(client=ClientSchema(**client_dict), accounts=accounts_list, categories=categories_list)
+        client_info_schema = ClientInfoSchema(
+            client=ClientSchema(**client_dict),
+            accounts=accounts_list,
+            categories=categories_list,
+        )
         return client_info_schema
     else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Client not found"
+        )
 
 
 async def client_balance_service(id_client: int, db: AsyncSession):
@@ -88,14 +104,21 @@ async def client_balance_service(id_client: int, db: AsyncSession):
         balance_list = []
 
         for db_account in db_client.accounts:
-
             account = AccountBalance()
             amount_pesos, amount_dolar = account.balance(db_account.movements)
 
-            balance_list.append({"id_account": db_account.id, "amount_pesos": amount_pesos, "amount_dolar": amount_dolar})
+            balance_list.append(
+                {
+                    "id_account": db_account.id,
+                    "amount_pesos": amount_pesos,
+                    "amount_dolar": amount_dolar,
+                }
+            )
 
         client_balance_schema = MovementBalanceSchema(balance=balance_list)
         return client_balance_schema
 
     else:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Client not found"
+        )

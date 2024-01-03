@@ -1,8 +1,10 @@
-from sqlalchemy import Column, ForeignKey, Integer, Enum, DateTime, Float
-from sqlalchemy.orm import relationship
-from app.models import MovementEnum
 from datetime import datetime
+
+from sqlalchemy import Column, DateTime, Enum, Float, ForeignKey, Integer
+from sqlalchemy.orm import relationship
+
 from app.config.db import Base
+from app.models import MovementEnum
 
 
 class Movement(Base):
