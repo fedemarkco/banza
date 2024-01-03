@@ -5,7 +5,7 @@ from app.config.db_testing import app
 from app.models.constants import MovementEnum
 
 
-class TestCaseCategory:
+class TestCaseMovement:
     def setup(self):
         self.client = TestClient(app)
 
