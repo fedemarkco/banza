@@ -1,0 +1,6 @@
+API_V1_STR=/api/v1
+DOLARSI=https://www.dolarsi.com/api/api.php?type=valoresprincipales
+DEBUG=False
+PROJECT_NAME=Banza
+PROJECT_VERSION=0.1.0
+BACKEND_CORS_ORIGINS=http://127.0.0.1:8000
